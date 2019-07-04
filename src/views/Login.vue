@@ -27,7 +27,7 @@
             <b-button type="is-primary" native-type="submit" @click="login">Ingresar</b-button>
           </div>
         </div>
-      </form>  
+      </form>
     </div>
   </div>
 </template>
@@ -47,7 +47,7 @@ export default {
         user: this.user,
         password: this.password
       }
-      console.log("asdasd")
+      console.log(userData)
       return false
     }
   }
