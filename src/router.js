@@ -21,7 +21,7 @@ export default new Router({
       component: Login
     },
     {
-      path: '/alumno',
+      path: '/alumno/:codigo',
       name: 'Alumno',
       component: Alumno
     },
