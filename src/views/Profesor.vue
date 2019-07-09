@@ -36,7 +36,7 @@
           <div class="is-size-5">
             Talleres
           </div>
-
+          <br />
           <b-table :data="talleres">
             <template slot-scope="props">
               <b-table-column field="codigo" label="ID" width="40" numeric>
@@ -57,7 +57,7 @@
 
               <b-table-column field="acciones" label="Acciones" width="80" numeric>
                 <b-button
-                  @click="viewTaller(props.row.codigo)"
+                  @click="viewTaller(props.row)"
                   size="is-small"
                   type="is-info"
                   outlined
@@ -76,9 +76,42 @@
           <br />
         </div>
 
-        <div class="is-size-5">
-          Talleres disponibles
+        <div v-show="alumnosFromTaller.length > 0">
+          <div class="is-size-5">
+            Alumnos en:  {{tallerSeleccionado.codigo}} - {{tallerSeleccionado.nombre}} ({{tallerSeleccionado.tipoTaller}})
+          </div>
+          <br />
+          <b-table :data="alumnosFromTaller">
+            <template slot-scope="props">
+              <b-table-column field="codigo" label="ID" width="40" numeric>
+                {{ props.row.codigo }}
+              </b-table-column>
+
+              <b-table-column field="nombre" label="Alumno">
+                {{ props.row.nombre }}
+              </b-table-column>
+
+              <b-table-column field="eval1" label="Eval 1" width="80" numeric>
+                {{ parseFloat(props.row.eval1) }}
+              </b-table-column>
+              <b-table-column field="eval2" label="Eval 2" width="80" numeric>
+                {{ parseFloat(props.row.eval2) }}
+              </b-table-column>
+              <b-table-column field="evalFinal" label="Eval final" width="80" numeric>
+                {{ parseFloat(props.row.evalFinal) }}
+              </b-table-column>
+              <b-table-column field="promedio" label="Promedio" width="80" numeric>
+                {{ (parseFloat(props.row.eval1) + parseFloat(props.row.eval2) + parseFloat(props.row.evalFinal)) / 3 }}
+              </b-table-column>
+
+            </template>
+          </b-table>
+
+          <br />
+          <br />
+          <br />
         </div>
+
         <br />
 
       </div>
@@ -98,7 +131,9 @@ export default {
   data () {
     return {
       docente: {},
-      talleres: []
+      talleres: [],
+      alumnosFromTaller: [],
+      tallerSeleccionado: {}
     }
   },
   methods: {
@@ -114,9 +149,14 @@ export default {
         })
         .catch(error => console.log(error, error.response))
     },
-    viewTaller (codigo) {
-      axios.get(uris.GET_ALUMNOS_FROM_TALLER(codigo))
-        .then(response => console.log(response.data.rows))
+    viewTaller (taller) {
+      this.tallerSeleccionado = taller
+      axios.get(uris.GET_ALUMNOS_FROM_TALLER(this.tallerSeleccionado.codigo))
+        .then(response => {
+          window.scrollTo(0, 999999)
+          console.log(response.data.rows)
+          this.alumnosFromTaller = response.data.rows
+        })
     },
     logout () {
       console.log('logout')
