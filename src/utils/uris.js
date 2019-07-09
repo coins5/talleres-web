@@ -9,6 +9,7 @@ const GET_TALLERES_FROM_ALUMNO = `${SERVER_URL}/alumno/{codigo}/getTalleres`
 const GET_DOCENTE = `${SERVER_URL}/getDocente/{codigo}`
 const GET_TALLERES_FROM_DOCENTE = `${SERVER_URL}/docente/{codigo}/getTalleres`
 const GET_ALUMNOS_FROM_TALLER = `${SERVER_URL}/taller/{codigo}/getAlumnos`
+const MATRICULA_SET_NOTA = `${SERVER_URL}/matricula/setNota`
 
 export default {
   GET_TALLERES,
@@ -27,5 +28,6 @@ export default {
   },
   GET_ALUMNOS_FROM_TALLER (codigo) {
     return GET_ALUMNOS_FROM_TALLER.replace('{codigo}', codigo)
-  }
+  },
+  MATRICULA_SET_NOTA
 }

@@ -37,7 +37,7 @@
             Talleres
           </div>
           <br />
-          <b-table :data="talleres">
+          <b-table :data="talleres" :selected.sync="selectedTaller" focusable>
             <template slot-scope="props">
               <b-table-column field="codigo" label="ID" width="40" numeric>
                 {{ props.row.codigo }}
@@ -61,7 +61,8 @@
                   size="is-small"
                   type="is-info"
                   outlined
-                  icon-left="eye">
+                  icon-left="eye"
+                  :inverted="selectedTaller == props.row">
                     ver
                 </b-button>
               </b-table-column>
@@ -81,7 +82,8 @@
             Alumnos en:  {{tallerSeleccionado.codigo}} - {{tallerSeleccionado.nombre}} ({{tallerSeleccionado.tipoTaller}})
           </div>
           <br />
-          <b-table :data="alumnosFromTaller">
+
+          <b-table :data="alumnosFromTaller" :selected.sync="selectedAlumnoFromTaller" focusable>
             <template slot-scope="props">
               <b-table-column field="codigo" label="ID" width="40" numeric>
                 {{ props.row.codigo }}
@@ -101,7 +103,7 @@
                 {{ parseFloat(props.row.evalFinal) }}
               </b-table-column>
               <b-table-column field="promedio" label="Promedio" width="80" numeric>
-                {{ (parseFloat(props.row.eval1) + parseFloat(props.row.eval2) + parseFloat(props.row.evalFinal)) / 3 }}
+                {{ calcPromedioInLine(props.row) }}
               </b-table-column>
 
               <b-table-column field="acciones" label="Acciones" width="80" numeric>
@@ -110,7 +112,8 @@
                   size="is-small"
                   type="is-info"
                   outlined
-                  icon-left="pen">
+                  icon-left="pen"
+                  :inverted="selectedAlumnoFromTaller == props.row">
                     Notas
                 </b-button>
               </b-table-column>
@@ -132,22 +135,26 @@
       <div class="card">
         <div class="card-content">
           <div class="content">
+            <div class="is-size-5">
+              {{alumnoSeleccionado.codigo}} - {{alumnoSeleccionado.nombre}}
+            </div>
             <br />
             <b-field horizontal label="Eval 1">
                 <b-input name="eval1" v-model="alumnoSeleccionado.eval1" expanded type="number" min="0" max="20" step="0.01"></b-input>
             </b-field>
             <b-field horizontal label="Eval 2">
-              <b-input name="eval2" v-model="alumnoSeleccionado.eval2" expanded type="number" min="0" max="20"></b-input>
+              <b-input name="eval2" v-model="alumnoSeleccionado.eval2" expanded type="number" min="0" max="20" step="0.01"></b-input>
             </b-field>
             <b-field horizontal label="Eval final">
-              <b-input name="evalFinal" v-model="alumnoSeleccionado.evalFinal" expanded type="number" min="0" max="20"></b-input>
+              <b-input name="evalFinal" v-model="alumnoSeleccionado.evalFinal" expanded type="number" min="0" max="20" step="0.01"></b-input>
             </b-field>
             <br />
             <div class="level">
               <div class="level-left">
+              Promedio final: {{calcPromedio}}
               </div>
               <div class="level-right">
-                <b-button type="is-primary" @click="joinAll()">Aceptar</b-button>
+                <b-button type="is-primary" @click="saveNotas()">Aceptar</b-button>
               </div>
             </div>
           </div>
@@ -168,12 +175,24 @@ export default {
   },
   data () {
     return {
+      selectedTaller: null,
+      selectedAlumnoFromTaller: null,
+
       docente: {},
       talleres: [],
       alumnosFromTaller: [],
       tallerSeleccionado: {},
-      isEditingNotas: true,
+      isEditingNotas: false,
       alumnoSeleccionado: {}
+    }
+  },
+  computed: {
+    calcPromedio () {
+      const eval1 = parseFloat(this.alumnoSeleccionado.eval1)
+      const eval2 = parseFloat(this.alumnoSeleccionado.eval2)
+      const evalFinal = parseFloat(this.alumnoSeleccionado.evalFinal)
+      const result = (eval1 + eval2 + evalFinal) / 3
+      return Math.round(result * 100) / 100
     }
   },
   methods: {
@@ -205,6 +224,43 @@ export default {
       alumno.evalFinal = parseFloat(alumno.evalFinal)
       this.alumnoSeleccionado = alumno
       this.isEditingNotas = true
+    },
+    saveNotas () {
+      const eval1 = {
+        codigoAlumno: this.alumnoSeleccionado.codigo,
+        codigoTaller: this.tallerSeleccionado.codigo,
+        tipoEval: 'eval1',
+        nota: this.alumnoSeleccionado.eval1
+      }
+
+      const eval2 = {
+        codigoAlumno: this.alumnoSeleccionado.codigo,
+        codigoTaller: this.tallerSeleccionado.codigo,
+        tipoEval: 'eval2',
+        nota: this.alumnoSeleccionado.eval2
+      }
+
+      const evalFinal = {
+        codigoAlumno: this.alumnoSeleccionado.codigo,
+        codigoTaller: this.tallerSeleccionado.codigo,
+        tipoEval: 'evalFinal',
+        nota: this.alumnoSeleccionado.evalFinal
+      }
+
+      axios.post(uris.MATRICULA_SET_NOTA, eval1)
+        .then(response => axios.post(uris.MATRICULA_SET_NOTA, eval2))
+        .then(response => axios.post(uris.MATRICULA_SET_NOTA, evalFinal))
+        // eslint-disable-next-line
+        .then(response => this.isEditingNotas = false)
+        .catch(error => console.log(error))
+      // console.log(this.alumnoSeleccionado)
+    },
+    calcPromedioInLine (alumno) {
+      const eval1 = parseFloat(alumno.eval1)
+      const eval2 = parseFloat(alumno.eval2)
+      const evalFinal = parseFloat(alumno.evalFinal)
+      const result = (eval1 + eval2 + evalFinal) / 3
+      return Math.round(result * 100) / 100
     },
     logout () {
       console.log('logout')

@@ -37,7 +37,7 @@
             Talleres matriculados
           </div>
           <br />
-          <b-table :data="talleresFromAlumno">
+          <b-table :data="talleresFromAlumno" :selected.sync="selectedTallerFromAlumno" focusable>
             <template slot-scope="props">
               <b-table-column field="codigo_taller" label="ID" width="40" numeric>
                 {{ props.row.codigo_taller }}
@@ -65,7 +65,7 @@
                 {{ parseFloat(props.row.evalFinal) }}
               </b-table-column>
               <b-table-column field="promedio" label="Promedio" width="80" numeric>
-                {{ (parseFloat(props.row.eval1) + parseFloat(props.row.eval2) + parseFloat(props.row.evalFinal)) / 3 }}
+                {{ calcPromedio(props.row) }}
               </b-table-column>
 
             </template>
@@ -82,7 +82,7 @@
           </div>
 
           <br />
-          <b-table :data="draftTalleres">
+          <b-table :data="draftTalleres" :selected.sync="selectedDraftTaller" focusable>
             <template slot-scope="props">
               <b-table-column field="codigo_taller" label="ID" width="40" numeric>
                 {{ props.row.codigo_taller }}
@@ -106,7 +106,8 @@
                   size="is-small"
                   type="is-danger"
                   outlined
-                  icon-left="delete">
+                  icon-left="delete"
+                  :inverted="selectedDraftTaller == props.row">
                     Borrar
                 </b-button>
               </b-table-column>
@@ -130,7 +131,7 @@
           Talleres disponibles
         </div>
         <br />
-        <b-table :data="talleres">
+        <b-table :data="talleres" :selected.sync="selectedTaller" focusable>
           <template slot-scope="props">
             <b-table-column field="codigo_taller" label="ID" width="40" numeric>
               {{ props.row.codigo_taller }}
@@ -155,7 +156,8 @@
                 size="is-small"
                 type="is-info"
                 outlined
-                icon-left="plus">
+                icon-left="plus"
+                :inverted="selectedTaller == props.row">
                   Unirme
               </b-button>
             </b-table-column>
@@ -182,6 +184,10 @@ export default {
   },
   data () {
     return {
+      selectedTallerFromAlumno: null,
+      selectedDraftTaller: null,
+      selectedTaller: null,
+
       alumno: {},
       draftTalleres: [],
       talleresFromAlumno: [],
@@ -278,6 +284,13 @@ export default {
     },
     createMatricula (codigoAlumno, codigoTaller) {
       return axios.post(uris.CREATE_MATRICULA, { codigo_alumno: codigoAlumno, codigo_taller: codigoTaller })
+    },
+    calcPromedio (alumno) {
+      const eval1 = parseFloat(alumno.eval1)
+      const eval2 = parseFloat(alumno.eval2)
+      const evalFinal = parseFloat(alumno.evalFinal)
+      const result = (eval1 + eval2 + evalFinal) / 3
+      return Math.round(result * 100) / 100
     },
     logout () {
       console.log('logout')
