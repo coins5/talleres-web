@@ -268,16 +268,17 @@ export default {
       if (last !== undefined) {
         this.createMatricula(last.codigo_alumno, last.codigo_taller)
           .then(response => this.recursiveCreateMatricula(data))
+          // eslint-disable-next-line
           .catch(err => this.recursiveCreateMatricula(data))
       } else {
         this.draftTalleres.length = 0
         axios.get(uris.GET_TALLERES_FROM_ALUMNO(this.$route.params.codigo))
-          .then(response => this.talleresFromAlumno = response.data.rows)
+          .then(response => { this.talleresFromAlumno = response.data.rows })
           .catch(err => console.log(err.response))
       }
     },
-    createMatricula (codigo_alumno, codigo_taller) {
-      return axios.post(uris.CREATE_MATRICULA, {codigo_alumno, codigo_taller})
+    createMatricula (codigoAlumno, codigoTaller) {
+      return axios.post(uris.CREATE_MATRICULA, { codigoAlumno, codigoTaller })
     },
     logout () {
       console.log('logout')
