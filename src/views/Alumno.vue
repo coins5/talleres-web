@@ -2,7 +2,10 @@
   <div>
     <nav class="level">
       <div class="level-left">
-        <img :src="require('../assets/logo_upc_red.png')" />
+        <img :src="require('../assets/logo_upc_red.png')" width="64" />
+        <div class="is-size-4">
+          Alumno
+        </div>
       </div>
       <div class="level-right">
         <p class="level-item">
@@ -28,10 +31,6 @@
 
     <div class="columns is-mobile is-centered">
       <div class="column">
-        <div class="is-size-3">
-          Proyecto Talleres
-        </div>
-        <br />
         <br />
         <div v-show="talleresFromAlumno.length > 0">
           <div class="is-size-5">
@@ -278,7 +277,7 @@ export default {
       }
     },
     createMatricula (codigoAlumno, codigoTaller) {
-      return axios.post(uris.CREATE_MATRICULA, { codigoAlumno, codigoTaller })
+      return axios.post(uris.CREATE_MATRICULA, { codigo_alumno: codigoAlumno, codigo_taller: codigoTaller })
     },
     logout () {
       console.log('logout')
