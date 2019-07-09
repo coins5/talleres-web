@@ -104,6 +104,17 @@
                 {{ (parseFloat(props.row.eval1) + parseFloat(props.row.eval2) + parseFloat(props.row.evalFinal)) / 3 }}
               </b-table-column>
 
+              <b-table-column field="acciones" label="Acciones" width="80" numeric>
+                <b-button
+                  @click="editNota(props.row)"
+                  size="is-small"
+                  type="is-info"
+                  outlined
+                  icon-left="pen">
+                    Notas
+                </b-button>
+              </b-table-column>
+
             </template>
           </b-table>
 
@@ -116,6 +127,33 @@
 
       </div>
     </div>
+
+    <b-modal :active.sync="isEditingNotas" :width="640" scroll="keep">
+      <div class="card">
+        <div class="card-content">
+          <div class="content">
+            <br />
+            <b-field horizontal label="Eval 1">
+                <b-input name="eval1" v-model="alumnoSeleccionado.eval1" expanded type="number" min="0" max="20" step="0.01"></b-input>
+            </b-field>
+            <b-field horizontal label="Eval 2">
+              <b-input name="eval2" v-model="alumnoSeleccionado.eval2" expanded type="number" min="0" max="20"></b-input>
+            </b-field>
+            <b-field horizontal label="Eval final">
+              <b-input name="evalFinal" v-model="alumnoSeleccionado.evalFinal" expanded type="number" min="0" max="20"></b-input>
+            </b-field>
+            <br />
+            <div class="level">
+              <div class="level-left">
+              </div>
+              <div class="level-right">
+                <b-button type="is-primary" @click="joinAll()">Aceptar</b-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </b-modal>
   </div>
 </template>
 
@@ -133,7 +171,9 @@ export default {
       docente: {},
       talleres: [],
       alumnosFromTaller: [],
-      tallerSeleccionado: {}
+      tallerSeleccionado: {},
+      isEditingNotas: true,
+      alumnoSeleccionado: {}
     }
   },
   methods: {
@@ -157,6 +197,14 @@ export default {
           console.log(response.data.rows)
           this.alumnosFromTaller = response.data.rows
         })
+    },
+    editNota (alumno) {
+      console.log(alumno)
+      alumno.eval1 = parseFloat(alumno.eval1)
+      alumno.eval2 = parseFloat(alumno.eval2)
+      alumno.evalFinal = parseFloat(alumno.evalFinal)
+      this.alumnoSeleccionado = alumno
+      this.isEditingNotas = true
     },
     logout () {
       console.log('logout')
