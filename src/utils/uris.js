@@ -1,4 +1,5 @@
-const SERVER_URL = 'http://localhost:2193'
+// const SERVER_URL = 'http://localhost:2193'
+const SERVER_URL = 'http://talleres.geosales.cloud'
 
 const GET_TALLERES = `${SERVER_URL}/getTalleres` // Crear ruta para obtener todos los talleres
 const CREATE_MATRICULA = `${SERVER_URL}/createMatricula`
