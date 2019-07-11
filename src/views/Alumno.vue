@@ -61,6 +61,9 @@
               <b-table-column field="eval2" label="Eval 2" width="80" numeric>
                 {{ parseFloat(props.row.eval2) }}
               </b-table-column>
+              <b-table-column field="evalVirtual" label="Virtual" width="80" numeric>
+                {{ parseFloat(props.row.evalVirtual) }}
+              </b-table-column>
               <b-table-column field="evalFinal" label="Eval final" width="80" numeric>
                 {{ parseFloat(props.row.evalFinal) }}
               </b-table-column>
@@ -288,8 +291,22 @@ export default {
     calcPromedio (alumno) {
       const eval1 = parseFloat(alumno.eval1)
       const eval2 = parseFloat(alumno.eval2)
+      const evalVirtual = parseFloat(alumno.evalVirtual)
       const evalFinal = parseFloat(alumno.evalFinal)
-      const result = (eval1 + eval2 + evalFinal) / 3
+
+      let result = 0
+      switch (alumno.tipoTaller) {
+        case 'teorico':
+          result = (eval1 * 0.25) + (eval2 * 0.25) + (evalFinal * 0.5)
+          break
+        case 'practico':
+          result = (eval1 * 0.2) + (eval2 * 0.2) + (evalFinal * 0.6)
+          break
+        case 'blended':
+          result = (eval1 * 0.15) + (eval2 * 0.15) + (evalVirtual * 0.2) + (evalFinal * 0.5)
+          break
+      }
+
       return Math.round(result * 100) / 100
     },
     logout () {

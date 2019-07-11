@@ -99,6 +99,9 @@
               <b-table-column field="eval2" label="Eval 2" width="80" numeric>
                 {{ parseFloat(props.row.eval2) }}
               </b-table-column>
+              <b-table-column field="evalVirtual" label="Virtual" width="80" numeric>
+                {{ parseFloat(props.row.evalVirtual) }}
+              </b-table-column>
               <b-table-column field="evalFinal" label="Eval final" width="80" numeric>
                 {{ parseFloat(props.row.evalFinal) }}
               </b-table-column>
@@ -145,6 +148,9 @@
             <b-field horizontal label="Eval 2">
               <b-input name="eval2" v-model="alumnoSeleccionado.eval2" expanded type="number" min="0" max="20" step="0.01"></b-input>
             </b-field>
+            <b-field horizontal label="Virtual" v-show="showEvalVirtual()">
+              <b-input name="Virtual" v-model="alumnoSeleccionado.evalVirtual" expanded type="number" min="0" max="20" step="0.01"></b-input>
+            </b-field>
             <b-field horizontal label="Eval final">
               <b-input name="evalFinal" v-model="alumnoSeleccionado.evalFinal" expanded type="number" min="0" max="20" step="0.01"></b-input>
             </b-field>
@@ -188,11 +194,28 @@ export default {
   },
   computed: {
     calcPromedio () {
-      const eval1 = parseFloat(this.alumnoSeleccionado.eval1)
-      const eval2 = parseFloat(this.alumnoSeleccionado.eval2)
-      const evalFinal = parseFloat(this.alumnoSeleccionado.evalFinal)
-      const result = (eval1 + eval2 + evalFinal) / 3
-      return Math.round(result * 100) / 100
+      if (this.selectedTaller) {
+        const eval1 = parseFloat(this.alumnoSeleccionado.eval1)
+        const eval2 = parseFloat(this.alumnoSeleccionado.eval2)
+        const evalVirtual = parseFloat(this.alumnoSeleccionado.evalVirtual)
+        const evalFinal = parseFloat(this.alumnoSeleccionado.evalFinal)
+        // const result = (eval1 + eval2 + evalFinal) / 3
+        let result = 0
+        switch (this.selectedTaller.tipoTaller) {
+          case 'teorico':
+            result = (eval1 * 0.25) + (eval2 * 0.25) + (evalFinal * 0.5)
+            break
+          case 'practico':
+            result = (eval1 * 0.2) + (eval2 * 0.2) + (evalFinal * 0.6)
+            break
+          case 'blended':
+            result = (eval1 * 0.15) + (eval2 * 0.15) + (evalVirtual * 0.2) + (evalFinal * 0.5)
+            break
+        }
+
+        return Math.round(result * 100) / 100
+      }
+      return 0
     }
   },
   methods: {
@@ -203,7 +226,6 @@ export default {
           return axios.get(uris.GET_TALLERES_FROM_DOCENTE(this.$route.params.codigo))
         })
         .then(response => {
-          console.log(response.data.rows)
           this.talleres = response.data.rows
         })
         .catch(error => console.log(error, error.response))
@@ -221,6 +243,7 @@ export default {
       console.log(alumno)
       alumno.eval1 = parseFloat(alumno.eval1)
       alumno.eval2 = parseFloat(alumno.eval2)
+      alumno.evalVirtual = parseFloat(alumno.evalVirtual)
       alumno.evalFinal = parseFloat(alumno.evalFinal)
       this.alumnoSeleccionado = alumno
       this.isEditingNotas = true
@@ -240,6 +263,13 @@ export default {
         nota: this.alumnoSeleccionado.eval2
       }
 
+      const evalVirtual = {
+        codigoAlumno: this.alumnoSeleccionado.codigo,
+        codigoTaller: this.tallerSeleccionado.codigo,
+        tipoEval: 'evalVirtual',
+        nota: this.alumnoSeleccionado.evalVirtual
+      }
+
       const evalFinal = {
         codigoAlumno: this.alumnoSeleccionado.codigo,
         codigoTaller: this.tallerSeleccionado.codigo,
@@ -249,6 +279,7 @@ export default {
 
       axios.post(uris.MATRICULA_SET_NOTA, eval1)
         .then(response => axios.post(uris.MATRICULA_SET_NOTA, eval2))
+        .then(response => axios.post(uris.MATRICULA_SET_NOTA, evalVirtual))
         .then(response => axios.post(uris.MATRICULA_SET_NOTA, evalFinal))
         // eslint-disable-next-line
         .then(response => this.isEditingNotas = false)
@@ -256,11 +287,33 @@ export default {
       // console.log(this.alumnoSeleccionado)
     },
     calcPromedioInLine (alumno) {
-      const eval1 = parseFloat(alumno.eval1)
-      const eval2 = parseFloat(alumno.eval2)
-      const evalFinal = parseFloat(alumno.evalFinal)
-      const result = (eval1 + eval2 + evalFinal) / 3
-      return Math.round(result * 100) / 100
+      if (this.selectedTaller) {
+        const eval1 = parseFloat(alumno.eval1)
+        const eval2 = parseFloat(alumno.eval2)
+        const evalVirtual = parseFloat(alumno.evalVirtual)
+        const evalFinal = parseFloat(alumno.evalFinal)
+        // const result = (eval1 + eval2 + evalFinal) / 3
+        let result = 0
+        switch (this.selectedTaller.tipoTaller) {
+          case 'teorico':
+            result = (eval1 * 0.25) + (eval2 * 0.25) + (evalFinal * 0.5)
+            break
+          case 'practico':
+            result = (eval1 * 0.2) + (eval2 * 0.2) + (evalFinal * 0.6)
+            break
+          case 'blended':
+            result = (eval1 * 0.15) + (eval2 * 0.15) + (evalVirtual * 0.2) + (evalFinal * 0.5)
+            break
+        }
+        return Math.round(result * 100) / 100
+      }
+    },
+    showEvalVirtual () {
+      if (this.selectedTaller) {
+        // eslint-disable-next-line
+        return this.selectedTaller.tipoTaller == 'blended'
+      }
+      return false
     },
     logout () {
       console.log('logout')
